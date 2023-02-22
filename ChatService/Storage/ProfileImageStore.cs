@@ -1,16 +1,16 @@
-﻿namespace ChatService.Storage;
+﻿using ChatService.Dtos;
 
-public class ProfileImageStore
+namespace ChatService.Storage;
+
+public class ProfileImageStore : IImageStore
 {
-    //get image using id
-    public async Task GetImage(IFormFile file)
+    public Task<UploadImageResponse?> GetImage(string id)
     {
-        
+        return new Task<UploadImageResponse>();
     }
 
-    //upload image
-    public async Task UploadImage(IFormFile file)
+    public Task UploadImage(IFormFile file)
     {
-        
+        return Task.CompletedTask;
     }
 }
