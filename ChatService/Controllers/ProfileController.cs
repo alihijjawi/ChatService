@@ -21,7 +21,7 @@ public class ProfileController : ControllerBase
     public async Task<ActionResult<ProfileDto>> PostProfile(ProfileDto profile)
     {
         var exists = await _profileStore.GetProfile(profile.UserName);
-        if (!exists.IsNull())
+        if (!(exists == null))
         {
             return Conflict($"A user with username {profile.UserName} already exists");
         }
@@ -34,7 +34,7 @@ public class ProfileController : ControllerBase
     public async Task<ActionResult<ProfileDto>> GetProfile(string userName)
     {
         var profile = await _profileStore.GetProfile(userName);
-        if (profile.IsNull())
+        if (profile == null)
         {
             return NotFound($"A user with username {userName} was not found");
         }

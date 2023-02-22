@@ -14,7 +14,8 @@ public class CosmosProfileStore : IProfileStore
         _cosmosClient = cosmosClient;
     }
 
-    private Container Container => _cosmosClient.GetDatabase("profiles").GetContainer("sharedContainer");
+    // DRY
+    private Container Container => _cosmosClient.GetDatabase("profilesDb").GetContainer("profiles");
 
     public async Task UpsertProfile(ProfileDto profile)
     {
@@ -30,13 +31,13 @@ public class CosmosProfileStore : IProfileStore
         await Container.UpsertItemAsync(ToEntity(profile));
     }
 
-    public async Task<ProfileDto?> GetProfile(string userName)
+    public async Task<ProfileDto?> GetProfile(string username)
     {
         try
         {
             var entity = await Container.ReadItemAsync<ProfileEntity>(
-                id: userName,
-                partitionKey: new PartitionKey(userName),
+                id: username,
+                partitionKey: new PartitionKey(username),
                 new ItemRequestOptions
                 {
                     ConsistencyLevel = ConsistencyLevel.Session
@@ -54,13 +55,13 @@ public class CosmosProfileStore : IProfileStore
         }
     }
 
-    public async Task DeleteProfile(string userName)
+    public async Task DeleteProfile(string username)
     {
         try
         {
             await Container.DeleteItemAsync<ProfileDto>(
-                id: userName,
-                partitionKey: new PartitionKey(userName)
+                id: username,
+                partitionKey: new PartitionKey(username)
             );
         }
         catch (CosmosException e)
@@ -78,7 +79,7 @@ public class CosmosProfileStore : IProfileStore
     {
         return new ProfileEntity(
             PartitionKey: profile.UserName,
-            profile.UserName,
+            id: profile.UserName,
             profile.FirstName,
             profile.LastName,
             profile.ProfilePictureId
@@ -88,7 +89,7 @@ public class CosmosProfileStore : IProfileStore
     private static ProfileDto ToProfile(ProfileEntity entity)
     {
         return new ProfileDto(
-            entity.UserName,
+            UserName: entity.id,
             entity.FirstName,
             entity.LastName,
             entity.ProfilePictureId
