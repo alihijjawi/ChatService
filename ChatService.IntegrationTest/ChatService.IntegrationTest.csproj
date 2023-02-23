@@ -24,4 +24,8 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ChatService\ChatService.csproj" />
+    </ItemGroup>
+
 </Project>
