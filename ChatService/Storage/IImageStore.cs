@@ -4,6 +4,6 @@ namespace ChatService.Storage;
 
 public interface IImageStore
 {
-    Task<UploadImageResponse?> GetImage(string id);
-    Task UploadImage(IFormFile file);
+    Task<UploadImageResponse?> DownloadImage(string id);
+    Task PostImage(IFormFile file);
 }

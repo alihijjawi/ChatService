@@ -4,12 +4,12 @@ namespace ChatService.Storage;
 
 public class ProfileImageStore : IImageStore
 {
-    public Task<UploadImageResponse?> GetImage(string id)
+    public Task<UploadImageResponse?> DownloadImage(string id)
     {
-        return new Task<UploadImageResponse>();
+        return null;
     }
 
-    public Task UploadImage(IFormFile file)
+    public Task PostImage(IFormFile file)
     {
         return Task.CompletedTask;
     }
