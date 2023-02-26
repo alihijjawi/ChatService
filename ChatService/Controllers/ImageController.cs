@@ -10,8 +10,13 @@ namespace ChatService.Controllers;
 
 public class ImageController : ControllerBase
 {
-    private ProfileImageStore _profileImageStore;
-    
+    private readonly IImageStore _profileImageStore;
+
+    public ImageController(IImageStore profileImageStore)
+    {
+        _profileImageStore = profileImageStore;
+    }
+
     [HttpPost]
     public async Task<ActionResult<UploadImageResponse>> PostImage([FromForm] UploadImageRequest request)
     {
@@ -19,17 +24,17 @@ public class ImageController : ControllerBase
         
         if (file.Length == 0)
         {
-            return BadRequest("Please select a file to upload.");
+            return BadRequest("No profile picture was provided to upload.");
         }
         
-        var fileStream = file.OpenReadStream();
+        var response = await _profileImageStore.UploadImage(file);
         
-        return _profileImageStore.UploadImage(request.File);
+        return CreatedAtAction(nameof(DownloadImage), new {id = response.ImageId}, response);
     }
     
     [HttpGet("{id}")]
-    public async Task<ActionResult<FileContentResult>> DownloadImage(string id)
+    public async Task<IActionResult> DownloadImage(string id)
     {
-        return _profileImageStore.GetImage(id);
+        return await _profileImageStore.DownloadImage(id);
     }
 }

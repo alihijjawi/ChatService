@@ -1,9 +1,11 @@
 using ChatService.Dtos;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ChatService.Storage;
 
 public interface IImageStore
 {
-    Task<UploadImageResponse?> DownloadImage(string id);
-    Task PostImage(IFormFile file);
+    Task<FileContentResult> DownloadImage(string id);
+    Task<UploadImageResponse> UploadImage(IFormFile file);
+    Task DeleteImage(string id);
 }
