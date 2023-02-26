@@ -54,11 +54,9 @@ public class ProfileImageStore : IImageStore
     {
         var blob = _cloudBlobContainer.GetBlockBlobReference(id);
         
-        if (!await blob.ExistsAsync())
+        if (!await blob.DeleteIfExistsAsync())
         {
             throw new ArgumentException($"Image with id:'{id}' does not exist");
         }
-
-        await blob.DeleteIfExistsAsync();
     }
 }

@@ -35,6 +35,15 @@ public class ImageController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> DownloadImage(string id)
     {
-        return await _profileImageStore.DownloadImage(id);
+        // the string "id" cant be null or whitespace since it is in the url, so we are not including the check in this function
+
+        try
+        {
+            return await _profileImageStore.DownloadImage(id);
+        }
+        catch (Exception e)
+        {
+            return NotFound("Image doesn't exist.");
+        }
     }
 }

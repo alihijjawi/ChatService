@@ -74,18 +74,21 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Theory]
-    [InlineData(null, "Foo", "Bar")]
-    [InlineData("", "Foo", "Bar")]
-    [InlineData(" ", "Foo", "Bar")]
-    [InlineData("foobar", null, "Bar")]
-    [InlineData("foobar", "", "Bar")]
-    [InlineData("foobar", "   ", "Bar")]
-    [InlineData("foobar", "Foo", "")]
-    [InlineData("foobar", "Foo", null)]
-    [InlineData("foobar", "Foo", " ")]
-    public async Task AddProfile_InvalidArgs(string UserName, string firstName, string lastName)
+    [InlineData(null, "Foo", "Bar", "imageId")]
+    [InlineData("", "Foo", "Bar", "imageId")]
+    [InlineData(" ", "Foo", "Bar", "imageId")]
+    [InlineData("foobar", null, "Bar", "imageId")]
+    [InlineData("foobar", "", "Bar", "imageId")]
+    [InlineData("foobar", "   ", "Bar", "imageId")]
+    [InlineData("foobar", "Foo", "", "imageId")]
+    [InlineData("foobar", "Foo", null, "imageId")]
+    [InlineData("foobar", "Foo", " ", "imageId")]
+    [InlineData("foobar", "Foo", "Bar", null)]
+    [InlineData("foobar", "Foo", "Bar", "")]
+    [InlineData("foobar", "Foo", "Bar", "  ")]
+    public async Task AddProfile_InvalidArgs(string userName, string firstName, string lastName, string imageId)
     {
-        var profile = new ProfileDto("foobar", "Foo", "Bar", "foobarImage");
+        var profile = new ProfileDto(userName, firstName, lastName, imageId);
         var response = await _httpClient.PostAsync("/Profile",
             new StringContent(JsonConvert.SerializeObject(profile), Encoding.Default, "application/json"));
 

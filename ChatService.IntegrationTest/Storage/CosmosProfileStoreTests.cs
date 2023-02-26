@@ -46,24 +46,21 @@ public class CosmosProfileStoreTests : IClassFixture<WebApplicationFactory<Progr
     }
     
     [Theory]
-    [InlineData(null, "Foo", "Bar", "image")]
-    [InlineData("", "Foo", "Bar", "image")]
-    [InlineData(" ", "Foo", "Bar", "image")]
-    [InlineData("foobar", null, "Bar", "image")]
-    [InlineData("foobar", "", "Bar", "image")]
-    [InlineData("foobar", "   ", "Bar", "image")]
-    [InlineData("foobar", "Foo", "", "image")]
-    [InlineData("foobar", "Foo", null, "image")]
-    [InlineData("foobar", "Foo", " ", "image")]
+    [InlineData(null, "Foo", "Bar", "imageId")]
+    [InlineData("", "Foo", "Bar", "imageId")]
+    [InlineData(" ", "Foo", "Bar", "imageId")]
+    [InlineData("foobar", null, "Bar", "imageId")]
+    [InlineData("foobar", "", "Bar", "imageId")]
+    [InlineData("foobar", "   ", "Bar", "imageId")]
+    [InlineData("foobar", "Foo", "", "imageId")]
+    [InlineData("foobar", "Foo", null, "imageId")]
+    [InlineData("foobar", "Foo", " ", "imageId")]
     [InlineData("foobar", "Foo", "Bar", null)]
     [InlineData("foobar", "Foo", "Bar", "  ")]
     [InlineData("foobar", "Foo", "Bar", "")]
     public async Task AddProfile_InvalidArgs(string username, string firstName, string lastName, string imageId)
     {
-        await Assert.ThrowsAsync<ArgumentException>(async () =>
-        {
-            await _store.UpsertProfile(new ProfileDto(username, firstName, lastName, imageId));
-        });
+        await Assert.ThrowsAsync<ArgumentException>(() => _store.UpsertProfile(new ProfileDto(username, firstName, lastName, imageId)));
     }
 
     [Fact]
