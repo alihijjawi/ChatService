@@ -1,3 +1,4 @@
+using ChatService.Services;
 using ChatService.Settings;
 using ChatService.Storage;
 using Microsoft.Azure.Cosmos;
@@ -28,6 +29,9 @@ builder.Services.AddSingleton(sp =>
     var storageAccount = CloudStorageAccount.Parse(blobOptions.Value.BlobStorageString);
     return storageAccount.CreateCloudBlobClient();
 });
+
+builder.Services.AddSingleton<IProfileService, ProfileService>();
+builder.Services.AddSingleton<IImageService, ImageService>();
 
 var app = builder.Build();
 

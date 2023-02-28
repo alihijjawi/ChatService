@@ -5,7 +5,7 @@ namespace ChatService.Storage;
 
 public interface IImageStore
 {
-    Task<FileContentResult> DownloadImage(string id);
-    Task<UploadImageResponse> UploadImage(IFormFile file);
+    Task DownloadImage(string id, Stream stream);
+    Task UploadImage(string blobName, Stream fileStream);
     Task DeleteImage(string id);
 }

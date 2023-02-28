@@ -15,50 +15,33 @@ public class ProfileImageStore : IImageStore
     private CloudBlobContainer _cloudBlobContainer => _cloudBlobClient.GetContainerReference("images");
 
     //download the image using id
-    public async Task<FileContentResult> DownloadImage(string id)
+    public async Task DownloadImage(string id, Stream stream)
     {
         var blob = _cloudBlobContainer.GetBlockBlobReference(id);
-        
         if (!await blob.ExistsAsync())
         {
             throw new ArgumentException($"Image with id:'{id}' does not exist");
         }
         
-        var stream = new MemoryStream();
         await blob.DownloadToStreamAsync(stream);
-        stream.Seek(0, SeekOrigin.Begin);
-        
-        return new FileContentResult(stream.ToArray(), "image/jpeg");
+        //stream.Seek(0, SeekOrigin.Begin);
     }
 
     //upload image
-    public async Task<UploadImageResponse> UploadImage(IFormFile file)
+    public async Task UploadImage(string blobName, Stream fileStream)
     {
-        var fileStream = file.OpenReadStream();
-        
-        var blobName = Guid.NewGuid().ToString();
         var blob = _cloudBlobContainer.GetBlockBlobReference(blobName);
-        
         await blob.UploadFromStreamAsync(fileStream);
-
-        return ToResponse(blobName);
     }
 
-    private static UploadImageResponse ToResponse(string blobName)
-    {
-        return new UploadImageResponse(blobName);
-    }
-    
     //delete image
     public async Task DeleteImage(string id)
     {
         var blob = _cloudBlobContainer.GetBlockBlobReference(id);
-        
-        if (!await blob.ExistsAsync())
+
+        if (!await blob.DeleteIfExistsAsync())
         {
             throw new ArgumentException($"Image with id:'{id}' does not exist");
         }
-
-        await blob.DeleteIfExistsAsync();
     }
 }
