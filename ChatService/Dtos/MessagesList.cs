@@ -3,6 +3,6 @@ using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 
 namespace ChatService.Dtos;
 
-public record MessagesInConversationResponse(
+public record MessagesList(
     [Required] MessageDto[] Messages,
     [Required] string NextUri);
