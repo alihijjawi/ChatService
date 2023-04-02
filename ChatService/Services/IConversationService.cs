@@ -2,9 +2,9 @@
 
 namespace ChatService.Services;
 
-public interface IConversationsService
+public interface IConversationService
 {
-    Task<StartConversationResponse> StartConversation(StartConversationRequest conversationRequest);
+    Task<StartConversationResponse> StartConversation(string conversationId, ProfileDto senderProfile);
 
     Task<ConversationsList> GetConversationList(string username,
         string continuationToken,

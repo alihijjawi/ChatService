@@ -1,10 +1,10 @@
-﻿using ChatService.Dtos;
+using ChatService.Dtos;
 
 namespace ChatService.Storage;
 
-public interface IMessagesStore
+public interface IMessageStore
 {
-    Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest);
+    Task<long> AddMessage(string conversationId, SendMessageRequest messageRequest);
 
     Task<ConversationDto> GetMessageList(string conversationId, string continuationToken, string limit,
         string lastSeenMessageTime);

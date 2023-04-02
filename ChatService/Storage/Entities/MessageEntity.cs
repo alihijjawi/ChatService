@@ -1,8 +1,8 @@
 ﻿namespace ChatService.Storage.Entities;
 
 public record MessageEntity(
-    string id, 
+    int id, 
     string ConversationId, 
     long UnixTime, 
-    string Sender,
+    string SenderUsername,
     string Text);

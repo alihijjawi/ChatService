@@ -9,21 +9,18 @@ namespace ChatService.Controllers;
 [Route("[controller]")]
 public class ConversationController : ControllerBase
 {
-    private readonly IConversationsService _conversationsService;
+    private readonly IChatManager _chatManager;
 
-    private readonly IMessagesService _messagesService;
-
-    public ConversationController(IConversationsService conversationsService, IMessagesService messagesService)
+    public ConversationController(IChatManager chatManager)
     {
-        _conversationsService = conversationsService;
-        _messagesService = messagesService;
+        _chatManager = chatManager;
     }
 
     [HttpPost]
     public async Task<ActionResult<StartConversationResponse>> StartConversation(
         StartConversationRequest conversationRequest)
     {
-        var response = await _conversationsService.StartConversation(conversationRequest);
+        var response = await _chatManager.StartConversation(conversationRequest);
 
         if (response.IsNull()) return NotFound();
 
@@ -34,7 +31,7 @@ public class ConversationController : ControllerBase
     public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId,
         SendMessageRequest messageRequest)
     {
-        var response = await _messagesService.SendMessage(conversationId, messageRequest);
+        var response = await _chatManager.SendMessage(conversationId, messageRequest);
 
         if (response.IsNull()) return NotFound();
 
@@ -48,7 +45,7 @@ public class ConversationController : ControllerBase
         [FromQuery] string lastSeenMessageTime)
     {
         var response =
-            await _messagesService.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
+            await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
 
         if (response.IsNull()) return NotFound();
 
@@ -62,7 +59,7 @@ public class ConversationController : ControllerBase
         [FromQuery] string lastSeenMessageTime)
     {
         var response =
-            await _conversationsService.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
+            await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
 
         if (response.IsNull()) return NotFound();
 

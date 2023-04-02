@@ -2,7 +2,7 @@
 
 namespace ChatService.Services;
 
-public interface IMessagesService
+public interface IMessageService
 {
     Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest);
 
