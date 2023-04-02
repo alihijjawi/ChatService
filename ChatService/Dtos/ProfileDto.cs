@@ -6,4 +6,4 @@ public record ProfileDto(
     [Required] string UserName, 
     [Required] string FirstName, 
     [Required] string LastName,
-    [Required] string ProfilePictureId);
+    string ProfilePictureId);

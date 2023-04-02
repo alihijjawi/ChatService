@@ -3,6 +3,6 @@
 namespace ChatService.Dtos;
 
 public record SendMessageRequest(
-    [Required] int MessageId,
+    [Required] string Id,
     [Required] string SenderUsername,
     [Required] string Text);

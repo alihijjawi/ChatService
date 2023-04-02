@@ -21,32 +21,42 @@ public class ChatManager: IChatManager
         var senderProfile = await _profileService.GetProfile(conversationRequest.Participants[0]);
         var receiverProfile = await _profileService.GetProfile(conversationRequest.Participants[1]);
 
-        if (senderProfile.IsNull() || receiverProfile.IsNull()) return null; //todo
+        if (senderProfile==null || receiverProfile==null) return null; //todo
 
-        var senderId = senderProfile.UserName + "_" + receiverProfile.UserName;
-        var receiverId = receiverProfile.UserName + "_" + senderProfile.UserName;
+        var senderConversationId = senderProfile.UserName + "_" + receiverProfile.UserName;
+        var receiverConversationId = receiverProfile.UserName + "_" + senderProfile.UserName;
 
+        var unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+        
+        await _conversationService.CreateConversation(receiverConversationId, receiverProfile, unixTime);
         var conversationResponse =
-            await _conversationService.StartConversation(senderId, senderProfile);
-        await _conversationService.StartConversation(receiverId, receiverProfile);
+            await _conversationService.CreateConversation(senderConversationId, senderProfile, unixTime);
 
-        await _messageService.SendMessage(senderId, conversationRequest.FirstMessage);
-        await _messageService.SendMessage(receiverId, conversationRequest.FirstMessage);
+        await _messageService.SendMessage(senderConversationId, conversationRequest.FirstMessage, unixTime);
+        await _messageService.SendMessage(receiverConversationId, conversationRequest.FirstMessage, unixTime);
 
         return conversationResponse;
     }
 
-    public async Task<ConversationsList> GetConversationList(string username, string continuationToken, string limit, string lastSeenMessageTime)
+    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit, string? lastSeenMessageTime)
     {
         return await _conversationService.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
     }
 
-    public async Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest)
+    public async Task<SendMessageResponse> SendMessage(string senderConversationId, SendMessageRequest messageRequest)
     {
-        return await _messageService.SendMessage(conversationId, messageRequest);
+        var unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+        var parts = senderConversationId.Split('_');
+        Array.Reverse(parts);
+        
+        var receiverConversationId = string.Join('_', parts);
+
+        await _messageService.SendMessage(receiverConversationId, messageRequest, unixTime);
+        return await _messageService.SendMessage(senderConversationId, messageRequest, unixTime);
     }
 
-    public async Task<ConversationDto> GetMessageList(string conversationId, string continuationToken, string limit, string lastSeenMessageTime)
+    public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
     {
         return await _messageService.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
     }

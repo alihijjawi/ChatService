@@ -7,14 +7,14 @@ public interface IChatManager
     Task<StartConversationResponse> StartConversation(StartConversationRequest conversationRequest);
 
     Task<ConversationsList> GetConversationList(string username,
-        string continuationToken,
-        string limit,
-        string lastSeenMessageTime);
+        string? continuationToken,
+        string? limit,
+        string? lastSeenMessageTime);
     
-    Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest);
+    Task<SendMessageResponse> SendMessage(string senderConversationId, SendMessageRequest messageRequest);
 
-    Task<ConversationDto> GetMessageList(string conversationId,
-        string continuationToken,
-        string limit,
-        string lastSeenMessageTime);
+    Task<MessagesList> GetMessageList(string conversationId,
+        string? continuationToken,
+        string? limit,
+        string? lastSeenMessageTime);
 }

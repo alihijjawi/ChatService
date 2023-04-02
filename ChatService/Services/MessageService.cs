@@ -11,13 +11,13 @@ public class MessageService: IMessageService
     {
         _messageStore = messageStore;
     }
-    public async Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest)
+    public async Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest, long unixTime)
     {
-        var unixTime = await _messageStore.AddMessage(conversationId, messageRequest);
+        await _messageStore.AddMessage(conversationId, messageRequest, unixTime);
         return new SendMessageResponse(unixTime);
     }
 
-    public async Task<ConversationDto> GetMessageList(string conversationId, string continuationToken, string limit, string lastSeenMessageTime)
+    public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
     {
         return await _messageStore.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
     }
