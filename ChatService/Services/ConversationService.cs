@@ -13,14 +13,14 @@ public class ConversationService : IConversationService
         _conversationStore = conversationStore;
     }
 
-    public async Task<StartConversationResponse> StartConversation(string conversationId, ProfileDto senderProfile)
+    public async Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime)
     {
-        var unixTime = await _conversationStore.CreateConversation(conversationId, senderProfile);
+        await _conversationStore.CreateConversation(conversationId, senderProfile, unixTime);
         return new StartConversationResponse(conversationId, unixTime);
     }
 
-    public async Task<ConversationsList> GetConversationList(string username, string continuationToken, string limit,
-        string lastSeenMessageTime)
+    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
+        string? lastSeenMessageTime)
     {
         return await _conversationStore.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
     }

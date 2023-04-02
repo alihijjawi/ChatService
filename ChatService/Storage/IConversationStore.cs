@@ -4,8 +4,8 @@ namespace ChatService.Storage;
 
 public interface IConversationStore
 {
-    Task<long> CreateConversation(string conversationId, ProfileDto recipient);
+    Task CreateConversation(string conversationId, ProfileDto recipient, long unixTime);
 
-    Task<ConversationsList> GetConversationList(string username, string continuationToken, string limit,
-        string lastSeenMessageTime);
+    Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
+        string? lastSeenMessageTime);
 }

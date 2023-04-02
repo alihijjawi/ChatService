@@ -4,8 +4,8 @@ namespace ChatService.Storage;
 
 public interface IMessageStore
 {
-    Task<long> AddMessage(string conversationId, SendMessageRequest messageRequest);
+    Task AddMessage(string conversationId, SendMessageRequest messageRequest, long unixTime);
 
-    Task<ConversationDto> GetMessageList(string conversationId, string continuationToken, string limit,
-        string lastSeenMessageTime);
+    Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit,
+        string? lastSeenMessageTime);
 }

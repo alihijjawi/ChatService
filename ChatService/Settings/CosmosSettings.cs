@@ -2,5 +2,5 @@
 
 public record CosmosSettings
 {
-    public string ProfileDbString { get; init; }
+    public string CosmosString { get; init; }
 }

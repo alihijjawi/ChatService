@@ -4,10 +4,10 @@ namespace ChatService.Services;
 
 public interface IConversationService
 {
-    Task<StartConversationResponse> StartConversation(string conversationId, ProfileDto senderProfile);
+    Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime);
 
     Task<ConversationsList> GetConversationList(string username,
-        string continuationToken,
-        string limit,
-        string lastSeenMessageTime);
+        string? continuationToken,
+        string? limit,
+        string? lastSeenMessageTime);
 }
