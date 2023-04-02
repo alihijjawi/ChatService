@@ -11,18 +11,16 @@ public class ProfileService : IProfileService
     {
         _profileStore = profileStore;
     }
-    
+
     public Task UpsertProfile(ProfileDto profile)
     {
         if (profile == null ||
             string.IsNullOrWhiteSpace(profile.UserName) ||
             string.IsNullOrWhiteSpace(profile.FirstName) ||
-            string.IsNullOrWhiteSpace(profile.LastName) || 
+            string.IsNullOrWhiteSpace(profile.LastName) ||
             string.IsNullOrWhiteSpace(profile.ProfilePictureId)
            )
-        {
             throw new ArgumentException($"Invalid profile {profile}", nameof(profile));
-        }
 
         return _profileStore.UpsertProfile(profile);
     }
