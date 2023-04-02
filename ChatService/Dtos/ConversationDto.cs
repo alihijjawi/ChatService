@@ -5,5 +5,5 @@ namespace ChatService.Dtos;
 
 public record ConversationDto(
     [Required] string Id,
-    [Required] UnixDateTime LastModifiedUnixTime,
+    [Required] long LastModifiedUnixTime,
     [Required] ProfileDto Recipient);

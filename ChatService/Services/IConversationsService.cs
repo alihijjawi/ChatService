@@ -1,15 +1,13 @@
 ﻿using ChatService.Dtos;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ChatService.Services;
 
 public interface IConversationsService
 {
-    Task<StartConversationResponse> StartConversation();
+    Task<StartConversationResponse> StartConversation(StartConversationRequest conversationRequest);
 
-    Task<SendMessageResponse> SendMessage();
-
-    Task<ConversationDto> GetConversation();
-
-    Task<ConversationsList> GetConversationList();
+    Task<ConversationsList> GetConversationList(string username,
+        string continuationToken,
+        string limit,
+        string lastSeenMessageTime);
 }

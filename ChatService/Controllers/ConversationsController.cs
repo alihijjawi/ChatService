@@ -11,50 +11,47 @@ public class ConversationController : ControllerBase
 {
     private readonly IConversationsService _conversationsService;
 
-    public ConversationController(IConversationsService conversationsService)
+    private readonly IMessagesService _messagesService;
+
+    public ConversationController(IConversationsService conversationsService, IMessagesService messagesService)
     {
         _conversationsService = conversationsService;
+        _messagesService = messagesService;
     }
 
     [HttpPost]
-    public async Task<ActionResult<StartConversationResponse>> StartConversation()
+    public async Task<ActionResult<StartConversationResponse>> StartConversation(
+        StartConversationRequest conversationRequest)
     {
-        var response = await _conversationsService.StartConversation();
-        
-        if (response.IsNull())
-        {
-            return NotFound();
-        }
-        
-        return CreatedAtAction(nameof(GetConversation), new {conversationId = response.ConversationId}, response);
+        var response = await _conversationsService.StartConversation(conversationRequest);
+
+        if (response.IsNull()) return NotFound();
+
+        return CreatedAtAction(nameof(GetMessageList), new { conversationId = response.ConversationId }, response);
     }
 
     [HttpPost("{conversationId}/messages")]
-    public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId)
+    public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId,
+        SendMessageRequest messageRequest)
     {
-        var response = await _conversationsService.SendMessage();
-        
-        if (response.IsNull())
-        {
-            return NotFound();
-        }
-        
-        return CreatedAtAction(nameof(GetConversation), new {conversationId}, response);
+        var response = await _messagesService.SendMessage(conversationId, messageRequest);
+
+        if (response.IsNull()) return NotFound();
+
+        return CreatedAtAction(nameof(GetMessageList), new { conversationId }, response);
     }
 
     [HttpGet("{conversationId}/messages")]
-    public async Task<ActionResult<MessagesList>> GetConversation(string conversationId, 
+    public async Task<ActionResult<MessagesList>> GetMessageList(string conversationId,
         [FromQuery] string continuationToken,
-        [FromQuery] string limit, 
+        [FromQuery] string limit,
         [FromQuery] string lastSeenMessageTime)
     {
-        var response = await _conversationsService.GetConversation();
+        var response =
+            await _messagesService.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
 
-        if (response.IsNull())
-        {
-            return NotFound();
-        }
-        
+        if (response.IsNull()) return NotFound();
+
         return Ok(response);
     }
 
@@ -64,13 +61,11 @@ public class ConversationController : ControllerBase
         [FromQuery] string limit,
         [FromQuery] string lastSeenMessageTime)
     {
-        var response = await _conversationsService.GetConversationList();
-        
-        if (response.IsNull())
-        {
-            return NotFound();
-        }
-        
+        var response =
+            await _conversationsService.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
+
+        if (response.IsNull()) return NotFound();
+
         return Ok(response);
     }
 }

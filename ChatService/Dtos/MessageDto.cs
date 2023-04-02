@@ -6,4 +6,4 @@ namespace ChatService.Dtos;
 public record MessageDto(
     [Required] string Text,
     [Required] string SenderUsername, 
-    [Required] UnixDateTime UnixTime);
+    [Required] long UnixTime);
