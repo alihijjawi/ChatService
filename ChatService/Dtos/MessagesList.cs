@@ -5,4 +5,4 @@ namespace ChatService.Dtos;
 
 public record MessagesList(
     [Required] MessageDto[] Messages,
-    [Required] string NextUrl);
+    [Required] string NextUri);

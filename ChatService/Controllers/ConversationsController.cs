@@ -25,7 +25,7 @@ public class ConversationsController : ControllerBase
     {
         var response = await _chatManager.StartConversation(conversationRequest);
 
-        if (response == null) return NotFound();
+        if (response == null) return NotFound("abcdefg");
 
         return CreatedAtAction(nameof(GetConversationList), null, response);
     }

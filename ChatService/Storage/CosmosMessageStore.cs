@@ -20,6 +20,7 @@ public class CosmosMessageStore: IMessageStore
     public async Task AddMessage(string conversationId, SendMessageRequest messageRequest, long unixTime)
     {
         var entity = ToEntity(messageRequest.Id, conversationId, messageRequest.SenderUsername, messageRequest.Text, unixTime);
+        
         await Container.CreateItemAsync(entity);
     }
 
@@ -31,11 +32,9 @@ public class CosmosMessageStore: IMessageStore
         
         var queryDefinition = new QueryDefinition(
             "SELECT * FROM c " +
-            $"WHERE c.UnixTime>{lastSeenMessageTime} " + 
+            $"WHERE c.UnixTime > {lastSeenMessageTime} " + 
             $"AND c.ConversationId = '{conversationId}' " +
-            "ORDER BY c.UnixTime");
-
-        lastSeenMessageTime = DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+            "ORDER BY c.UnixTime DESC");
 
         var requestOptions = new QueryRequestOptions
         {
@@ -57,10 +56,14 @@ public class CosmosMessageStore: IMessageStore
         continuationToken = response.ContinuationToken;
 
         var conversationList = response.Select(ToMessage).ToArray();
+        
+        var nextUri = "";
 
-        lastSeenMessageTime = conversationList[^1].UnixTime.ToString();
-
-        var nextUri = $"/Conversation/{conversationId}/messages?&limit={limit}&lastSeenMessageTime={lastSeenMessageTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
+        if (iterator.HasMoreResults)
+        {
+            nextUri =
+                $"api/conversations/{conversationId}/messages?&limit={limit}&lastSeenMessageTime={lastSeenMessageTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
+        }
 
         return new MessagesList(conversationList,nextUri);
     }

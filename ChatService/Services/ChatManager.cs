@@ -33,9 +33,9 @@ public class ChatManager : IChatManager
 
         var unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-        await _conversationService.CreateConversation(conversationId, receiverProfile, unixTime);
-        var conversationResponse = await _conversationService.CreateConversation(conversationId, senderProfile, unixTime);
-
+        await _conversationService.CreateConversation(conversationId, senderProfile, unixTime);
+        var conversationResponse = await _conversationService.CreateConversation(conversationId, receiverProfile, unixTime);
+        
         await _messageService.SendMessage(conversationId, conversationRequest.FirstMessage, unixTime);
 
         return conversationResponse;
@@ -51,7 +51,20 @@ public class ChatManager : IChatManager
     {
         var unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-        return await _messageService.SendMessage(conversationId, messageRequest, unixTime);
+        var conversations = await _conversationService.GetConversationById(conversationId);
+
+        var response = await _messageService.SendMessage(conversationId, messageRequest, unixTime);
+
+        var recipient1 = conversations.Conversations[0].Recipient;
+        
+        var recipient2 = conversations.Conversations[1].Recipient;
+        
+        await Task.WhenAll(
+            _conversationService.UpdateConversation(conversationId, recipient1, unixTime),
+            _conversationService.UpdateConversation(conversationId, recipient2, unixTime)
+        );
+        
+        return response;
     }
 
     public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit,

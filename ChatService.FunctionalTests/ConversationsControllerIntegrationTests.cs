@@ -199,8 +199,8 @@ namespace ChatServiceFunctionalTests
         [TestMethod]
         public async Task AddingDuplicateMessageReturnsConflict()
         {
-            string participant1 = RandomString();
-            string participant2 = RandomString();
+            string participant1 = "participant1";
+            string participant2 = "participant2";
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
 
 

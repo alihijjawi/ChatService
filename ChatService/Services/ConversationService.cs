@@ -15,8 +15,18 @@ public class ConversationService : IConversationService
 
     public async Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime)
     {
-        await _conversationStore.CreateConversation(conversationId, senderProfile, unixTime);
+        await _conversationStore.UpsertConversation(conversationId, senderProfile, unixTime);
         return new StartConversationResponse(conversationId, unixTime);
+    }
+
+    public async Task UpdateConversation(string conversationId, ProfileDto senderProfile, long unixTime)
+    {
+        await _conversationStore.UpsertConversation(conversationId, senderProfile, unixTime);
+    }
+
+    public async Task<ConversationsList> GetConversationById(string conversationId)
+    {
+        return await _conversationStore.GetConversationById(conversationId);
     }
 
     public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,

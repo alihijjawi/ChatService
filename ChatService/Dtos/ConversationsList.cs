@@ -4,4 +4,4 @@ namespace ChatService.Dtos;
 
 public record ConversationsList(
     [Required] ConversationDto[] Conversations,
-    [Required] string NextUrl);
+    [Required] string NextUri);

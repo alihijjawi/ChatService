@@ -10,4 +10,8 @@ public interface IConversationService
         string? continuationToken,
         string? limit,
         string? lastSeenMessageTime);
+
+    Task<ConversationsList> GetConversationById(string conversationId);
+
+    Task UpdateConversation(string conversationId, ProfileDto senderProfile, long unixTime);
 }

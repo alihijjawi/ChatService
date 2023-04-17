@@ -1,12 +1,7 @@
-﻿using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Unicode;
-using System.Web;
+﻿using System.Web;
 using ChatService.Dtos;
 using ChatService.Storage.Entities;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 
 namespace ChatService.Storage;
 
@@ -21,7 +16,7 @@ public class CosmosConversationStore : IConversationStore
 
     private Container Container => _cosmosClient.GetDatabase("conversationsDb").GetContainer("conversations");
 
-    public async Task CreateConversation(string conversationId, ProfileDto recipient, long unixTime)
+    public async Task UpsertConversation(string conversationId, ProfileDto recipient, long unixTime)
     {
         var entity = ToEntity(conversationId, recipient, unixTime);
         await Container.UpsertItemAsync(entity);
@@ -38,15 +33,15 @@ public class CosmosConversationStore : IConversationStore
             "SELECT * FROM c " +
             $"WHERE c.LastModifiedUnixTime > {lastSeenMessageTime} " + 
             $"AND (c.id LIKE '{username}_%' OR c.id LIKE '%_{username}') " +
-            $"AND c.Recipient.UserName = '{username}' " +
-            "ORDER BY c.LastModifiedUnixTime");
+            $"AND c.Recipient.UserName != '{username}' " +
+            "ORDER BY c.LastModifiedUnixTime DESC");
 
         var requestOptions = new QueryRequestOptions
         {
             MaxItemCount = int.Parse(limit)
         };
 
-        var iterator = continuationToken == null ? 
+        var iterator = (continuationToken == null) ? 
             Container.GetItemQueryIterator<ConversationEntity>(queryDefinition, requestOptions: requestOptions) 
             : 
             Container.GetItemQueryIterator<ConversationEntity>(queryDefinition, requestOptions: requestOptions, continuationToken: continuationToken);
@@ -65,11 +60,38 @@ public class CosmosConversationStore : IConversationStore
 
         var conversationList = response.Select(ToConversation).ToArray();
 
-        var nextUrl = $"/conversations?username={username}&limit={limit}&lastSeenMessageTime={lastSeenMessageTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
+        var nextUri = "";
         
-        return new ConversationsList(conversationList,nextUrl);
+        if (iterator.HasMoreResults)
+        {
+            nextUri = $"api/conversations?username={username}&limit={limit}&lastSeenMessageTime={lastSeenMessageTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
+        }
+        
+        return new ConversationsList(conversationList,nextUri);
     }
-    
+
+    public async Task<ConversationsList> GetConversationById(string conversationId)
+    {
+        var queryDefinition = new QueryDefinition(
+            "SELECT * FROM c " +
+            $"WHERE c.id = '{conversationId}'");
+
+        var iterator = Container.GetItemQueryIterator<ConversationEntity>(queryDefinition);
+        
+        var response = await iterator.ReadNextAsync();
+            
+        if (response.Diagnostics != null)
+        {
+            Console.WriteLine($"\nGetConversationById Diagnostics: {response.Diagnostics.ToString()}");
+        }
+
+        var conversationList = response.Select(ToConversation).ToArray();
+
+        var nextUri = "";
+        
+        return new ConversationsList(conversationList,nextUri);
+    }
+
     private static ConversationEntity ToEntity(string conversationId, ProfileDto recipient, long unixTime)
     {
         return new ConversationEntity(
