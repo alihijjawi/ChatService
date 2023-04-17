@@ -10,11 +10,11 @@ namespace ChatService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ConversationController : ControllerBase
+public class ConversationsController : ControllerBase
 {
     private readonly IChatManager _chatManager;
 
-    public ConversationController(IChatManager chatManager)
+    public ConversationsController(IChatManager chatManager)
     {
         _chatManager = chatManager;
     }
@@ -30,15 +30,15 @@ public class ConversationController : ControllerBase
         return CreatedAtAction(nameof(GetConversationList), null, response);
     }
 
-    [HttpPost("{senderConversationId}/messages")]
-    public async Task<ActionResult<SendMessageResponse>> SendMessage(string senderConversationId,
+    [HttpPost("{conversationId}/messages")]
+    public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId,
         SendMessageRequest messageRequest)
     {
-        var response = await _chatManager.SendMessage(senderConversationId, messageRequest);
+        var response = await _chatManager.SendMessage(conversationId, messageRequest);
 
         if (response == null) return NotFound();
 
-        return CreatedAtAction(nameof(GetMessageList), new { conversationId = senderConversationId }, response);
+        return CreatedAtAction(nameof(GetMessageList), new { conversationId = conversationId }, response);
     }
 
     [HttpGet("{conversationId}/messages")]

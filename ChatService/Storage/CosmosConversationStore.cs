@@ -36,8 +36,9 @@ public class CosmosConversationStore : IConversationStore
         
         var queryDefinition = new QueryDefinition(
             "SELECT * FROM c " +
-            $"WHERE c.LastModifiedUnixTime>{lastSeenMessageTime} " + 
-            $"AND c.id LIKE '{username}_%' "+
+            $"WHERE c.LastModifiedUnixTime > {lastSeenMessageTime} " + 
+            $"AND (c.id LIKE '{username}_%' OR c.id LIKE '%_{username}') " +
+            $"AND c.Recipient.UserName = '{username}' " +
             "ORDER BY c.LastModifiedUnixTime");
 
         var requestOptions = new QueryRequestOptions

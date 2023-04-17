@@ -11,7 +11,7 @@ public interface IChatManager
         string? limit,
         string? lastSeenMessageTime);
     
-    Task<SendMessageResponse> SendMessage(string senderConversationId, SendMessageRequest messageRequest);
+    Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest);
 
     Task<MessagesList> GetMessageList(string conversationId,
         string? continuationToken,
