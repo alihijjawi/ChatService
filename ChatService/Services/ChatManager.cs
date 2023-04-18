@@ -42,9 +42,9 @@ public class ChatManager : IChatManager
     }
 
     public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
-        string? lastSeenMessageTime)
+        string? lastSeenConversationTime)
     {
-        return await _conversationService.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
+        return await _conversationService.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
     }
 
     public async Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest)

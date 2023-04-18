@@ -9,7 +9,7 @@ public interface IConversationService
     Task<ConversationsList> GetConversationList(string username,
         string? continuationToken,
         string? limit,
-        string? lastSeenMessageTime);
+        string? lastSeenConversationTime);
 
     Task<ConversationsList> GetConversationById(string conversationId);
 

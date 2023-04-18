@@ -23,15 +23,15 @@ public class CosmosConversationStore : IConversationStore
     }
 
     public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
-        string? lastSeenMessageTime)
+        string? lastSeenConversationTime)
     {
-        lastSeenMessageTime = lastSeenMessageTime ?? "0";
+        lastSeenConversationTime = lastSeenConversationTime ?? "0";
         
         limit = limit ?? "50";
         
         var queryDefinition = new QueryDefinition(
             "SELECT * FROM c " +
-            $"WHERE c.LastModifiedUnixTime > {lastSeenMessageTime} " + 
+            $"WHERE c.LastModifiedUnixTime > {lastSeenConversationTime} " + 
             $"AND (c.id LIKE '{username}_%' OR c.id LIKE '%_{username}') " +
             $"AND c.Recipient.UserName != '{username}' " +
             "ORDER BY c.LastModifiedUnixTime DESC");
@@ -64,7 +64,7 @@ public class CosmosConversationStore : IConversationStore
         
         if (iterator.HasMoreResults)
         {
-            nextUri = $"api/conversations?username={username}&limit={limit}&lastSeenMessageTime={lastSeenMessageTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
+            nextUri = $"api/conversations?username={username}&limit={limit}&lastSeenMessageTime={lastSeenConversationTime}&continuationToken={HttpUtility.UrlEncode(continuationToken)}";
         }
         
         return new ConversationsList(conversationList,nextUri);

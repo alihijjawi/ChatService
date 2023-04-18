@@ -21,7 +21,12 @@ public class CosmosMessageStore: IMessageStore
     {
         var entity = ToEntity(messageRequest.Id, conversationId, messageRequest.SenderUsername, messageRequest.Text, unixTime);
         
-        await Container.CreateItemAsync(entity);
+        var response = await Container.CreateItemAsync(entity);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            throw new Exception();
+        }
     }
 
     public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)

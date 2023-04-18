@@ -30,8 +30,8 @@ public class ConversationService : IConversationService
     }
 
     public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
-        string? lastSeenMessageTime)
+        string? lastSeenConversationTime)
     {
-        return await _conversationStore.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
+        return await _conversationStore.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
     }
 }

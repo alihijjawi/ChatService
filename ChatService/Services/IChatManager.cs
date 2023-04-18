@@ -9,7 +9,7 @@ public interface IChatManager
     Task<ConversationsList> GetConversationList(string username,
         string? continuationToken,
         string? limit,
-        string? lastSeenMessageTime);
+        string? lastSeenConversationTime);
     
     Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest);
 

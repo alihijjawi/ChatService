@@ -25,7 +25,7 @@ public class ConversationsController : ControllerBase
     {
         var response = await _chatManager.StartConversation(conversationRequest);
 
-        if (response == null) return NotFound("abcdefg");
+        if (response == null) return NotFound("");
 
         return CreatedAtAction(nameof(GetConversationList), null, response);
     }
@@ -34,11 +34,15 @@ public class ConversationsController : ControllerBase
     public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId,
         SendMessageRequest messageRequest)
     {
-        var response = await _chatManager.SendMessage(conversationId, messageRequest);
-
-        if (response == null) return NotFound();
-
-        return CreatedAtAction(nameof(GetMessageList), new { conversationId = conversationId }, response);
+        try
+        {
+            var response = await _chatManager.SendMessage(conversationId, messageRequest);
+            return CreatedAtAction(nameof(GetMessageList), new { conversationId = conversationId }, response);
+        }
+        catch
+        {
+            return Conflict();
+        }
     }
 
     [HttpGet("{conversationId}/messages")]
@@ -59,10 +63,10 @@ public class ConversationsController : ControllerBase
     public async Task<ActionResult<ConversationsList>> GetConversationList([FromQuery] string username,
         [FromQuery] string? continuationToken,
         [FromQuery] string? limit,
-        [FromQuery] string? lastSeenMessageTime)
+        [FromQuery] string? lastSeenConversationTime)
     {
         var response =
-            await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenMessageTime);
+            await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
 
         if (response == null) return NotFound();
         

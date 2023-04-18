@@ -14,6 +14,7 @@ public class MessageService: IMessageService
     public async Task<SendMessageResponse> SendMessage(string conversationId, SendMessageRequest messageRequest, long unixTime)
     {
         await _messageStore.AddMessage(conversationId, messageRequest, unixTime);
+
         return new SendMessageResponse(unixTime);
     }
 

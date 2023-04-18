@@ -7,11 +7,11 @@ namespace ChatService.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 
-public class ImageController : ControllerBase
+public class ImagesController : ControllerBase
 {
     private readonly IImageService _profileImageService;
 
-    public ImageController(IImageService profileImageService)
+    public ImagesController(IImageService profileImageService)
     {
         _profileImageService = profileImageService;
     }

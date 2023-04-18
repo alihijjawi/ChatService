@@ -7,7 +7,7 @@ public interface IConversationStore
     Task UpsertConversation(string conversationId, ProfileDto recipient, long unixTime);
 
     Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
-        string? lastSeenMessageTime);
+        string? lastSeenConversationTime);
     
     Task<ConversationsList> GetConversationById(string conversationId);
 }

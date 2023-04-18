@@ -172,8 +172,15 @@ namespace ChatServiceFunctionalTests
         [TestMethod]
         public async Task ListMessagesWithMinDateTime()
         {
+            //We require a viable profile object in order to start a conversation so this test was modified slightly
             string participant1 = RandomString();
             string participant2 = RandomString();
+            
+            await Task.WhenAll(
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1"}),
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
+            );
+            
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
 
             var conversationDto = await _chatServiceClient.AddConversation(createConversationDto);
@@ -199,8 +206,15 @@ namespace ChatServiceFunctionalTests
         [TestMethod]
         public async Task AddingDuplicateMessageReturnsConflict()
         {
-            string participant1 = "participant1";
-            string participant2 = "participant2";
+            //We require a viable profile object in order to start a conversation so this test was modified slightly
+            string participant1 = RandomString();
+            string participant2 = RandomString();
+            
+            await Task.WhenAll(
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1"}),
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
+            );
+            
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
 
 
