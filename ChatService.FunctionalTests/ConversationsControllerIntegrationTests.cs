@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
+using System.Threading.Tasks;
 using ChatService.Client;
 using ChatService.DataContracts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -38,11 +40,12 @@ namespace ChatServiceFunctionalTests
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant3, FirstName = "Participant", LastName = "3" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant4, FirstName = "Participant", LastName = "4" })
             );
+            await Task.Delay(4000);
 
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant2));
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant3));
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant4));
-
+            await Task.Delay(4000);
             ListConversationsResponse participant1ConversationsDto = await _chatServiceClient.ListConversations(participant1, limit:2);
             Assert.AreEqual(2, participant1ConversationsDto.Conversations.Count);
             Assert.AreEqual(participant4, participant1ConversationsDto.Conversations[0].Recipient.Username);
@@ -69,9 +72,11 @@ namespace ChatServiceFunctionalTests
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
             );
+            await Task.Delay(4000);
 
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
             var conversationDto = await _chatServiceClient.AddConversation(createConversationDto);
+            await Task.Delay(4000);
             ListMessagesResponse listMessagesDto = await _chatServiceClient.ListMessages(conversationDto.Id);
             Assert.AreEqual(1, listMessagesDto.Messages.Count);
             Assert.AreEqual(createConversationDto.FirstMessage.Text, listMessagesDto.Messages[0].Text);
@@ -91,15 +96,16 @@ namespace ChatServiceFunctionalTests
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant3, FirstName = "Participant", LastName = "3" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant4, FirstName = "Participant", LastName = "4" })
             );
-
+            await Task.Delay(4000);
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant2));
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant3));
-
+            await Task.Delay(4000);
             ListConversationsResponse conversationsDto = await _chatServiceClient.ListConversations(participant1, limit:2);
             Assert.AreEqual(2, conversationsDto.Conversations.Count);
             Assert.AreEqual(participant3, conversationsDto.Conversations[0].Recipient.Username);
             
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant4));
+            await Task.Delay(4000);
             conversationsDto = await _chatServiceClient.ListConversations(participant1, limit:10, conversationsDto.Conversations[0].LastModifiedUnixTime);
             
             Assert.AreEqual(1, conversationsDto.Conversations.Count);
@@ -116,16 +122,16 @@ namespace ChatServiceFunctionalTests
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
                 );
-
+            await Task.Delay(4000);
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
             var conversationDto = await _chatServiceClient.AddConversation(createConversationDto);
-
+            await Task.Delay(4000);
             var message1 = createConversationDto.FirstMessage;
             var message2 = new SendMessageRequest(RandomString(), "What's up?", participant1);
             var message3 = new SendMessageRequest(RandomString(), "Not much!", participant2);
             await _chatServiceClient.SendMessage(conversationDto.Id, message2);
             await _chatServiceClient.SendMessage(conversationDto.Id, message3);
-
+            await Task.Delay(4000);
             // list two top messages
             ListMessagesResponse listMessagesDto = await _chatServiceClient.ListMessages(conversationDto.Id, 2);
             Assert.AreEqual(2, listMessagesDto.Messages.Count);
@@ -151,10 +157,10 @@ namespace ChatServiceFunctionalTests
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant3, FirstName = "Participant", LastName = "3" })
             );
-
+            await Task.Delay(4000);
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant2));
             await _chatServiceClient.AddConversation(NewConversationDto(participant1, "Hello", participant1, participant3));
-
+            await Task.Delay(4000);
             ListConversationsResponse conversationsDto = await _chatServiceClient.ListConversations(participant1, limit: 2);
             Assert.AreEqual(2, conversationsDto.Conversations.Count);
             Assert.AreEqual(participant3, conversationsDto.Conversations[0].Recipient.Username);
@@ -163,7 +169,7 @@ namespace ChatServiceFunctionalTests
             // sending a message to participant2 should put it's conversation on top
             var message = new SendMessageRequest(RandomString(), "Hello", participant1);
             await _chatServiceClient.SendMessage(conversationsDto.Conversations[1].Id, message);
-
+            await Task.Delay(4000);
             conversationsDto = await _chatServiceClient.ListConversations(participant1, limit: 1);
             Assert.AreEqual(1, conversationsDto.Conversations.Count);
             Assert.AreEqual(participant2, conversationsDto.Conversations[0].Recipient.Username);
@@ -172,30 +178,29 @@ namespace ChatServiceFunctionalTests
         [TestMethod]
         public async Task ListMessagesWithMinDateTime()
         {
-            //We require a viable profile object in order to start a conversation so this test was modified slightly
             string participant1 = RandomString();
             string participant2 = RandomString();
             
             await Task.WhenAll(
-                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1"}),
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
-            );
-            
+                );
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
-
+            await Task.Delay(4000);
             var conversationDto = await _chatServiceClient.AddConversation(createConversationDto);
             var message1 = createConversationDto.FirstMessage;
             var message2 = new SendMessageRequest(RandomString(), "What's up?", participant1);
             var message3 = new SendMessageRequest(RandomString(), "Not much!", participant2);
+            await Task.Delay(4000);
             await _chatServiceClient.SendMessage(conversationDto.Id, message2);
             await _chatServiceClient.SendMessage(conversationDto.Id, message3);
-
+            await Task.Delay(4000);
             ListMessagesResponse listMessagesDto = await _chatServiceClient.ListMessages(conversationDto.Id, 10);
             Assert.AreEqual(3, listMessagesDto.Messages.Count);
 
             var message4 = new SendMessageRequest(RandomString(), "OK...", participant1);
             await _chatServiceClient.SendMessage(conversationDto.Id, message4);
-            
+            await Task.Delay(4000);
             // list all messages received after the datetime of message3
             listMessagesDto = await _chatServiceClient.ListMessages(conversationDto.Id, 10, lastSeenMessageTime:listMessagesDto.Messages[0].UnixTime);
             Assert.AreEqual(1, listMessagesDto.Messages.Count);
@@ -206,22 +211,20 @@ namespace ChatServiceFunctionalTests
         [TestMethod]
         public async Task AddingDuplicateMessageReturnsConflict()
         {
-            //We require a viable profile object in order to start a conversation so this test was modified slightly
             string participant1 = RandomString();
             string participant2 = RandomString();
-            
             await Task.WhenAll(
-                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1"}),
+                _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant1, FirstName = "Participant", LastName = "1" }),
                 _chatServiceClient.CreateProfile(new CreateProfileRequest { Username = participant2, FirstName = "Participant", LastName = "2" })
             );
-            
             var createConversationDto = NewConversationDto(participant1, "Hello", participant1, participant2);
-
+            await Task.Delay(4000);
 
             var conversationDto = await _chatServiceClient.AddConversation(createConversationDto);
-            var message = new SendMessageRequest(RandomString(), "Hello", participant1);
+            await Task.Delay(4000);
+            var message = new SendMessageRequest(conversationDto.Id, "Hello", participant1); //the conversation id was random string but i changed to the id of the conversation in the response
             await _chatServiceClient.SendMessage(conversationDto.Id, message);
-
+            await Task.Delay(4000);
             try
             {
                 await _chatServiceClient.SendMessage(conversationDto.Id, message);
