@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using ChatService.Storage;
 using ChatService.Dtos;
 using ChatService.Services;
 using Microsoft.AspNetCore.Mvc.Testing;

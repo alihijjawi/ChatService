@@ -17,7 +17,7 @@ public class ChatManager : IChatManager
         _messageService = messageService;
     }
 
-    public async Task<StartConversationResponse> StartConversation(StartConversationRequest conversationRequest)
+    public async Task<StartConversationResponse?> StartConversation(StartConversationRequest conversationRequest)
     {
         var senderProfile = await _profileService.GetProfile(conversationRequest.Participants[0]);
         var receiverProfile = await _profileService.GetProfile(conversationRequest.Participants[1]);
@@ -41,7 +41,7 @@ public class ChatManager : IChatManager
         return conversationResponse;
     }
 
-    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
+    public async Task<ConversationsList?> GetConversationList(string username, string? continuationToken, string? limit,
         string? lastSeenConversationTime)
     {
         return await _conversationService.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
@@ -67,7 +67,7 @@ public class ChatManager : IChatManager
         return response;
     }
 
-    public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit,
+    public async Task<MessagesList?> GetMessageList(string conversationId, string? continuationToken, string? limit,
         string? lastSeenMessageTime)
     {
         return await _messageService.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);

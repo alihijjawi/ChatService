@@ -25,11 +25,11 @@ public class CosmosMessageStore: IMessageStore
 
         if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
         {
-            throw new Exception();
+            throw new Exception("Duplicate message id sent.");
         }
     }
 
-    public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
+    public async Task<MessagesList?> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
     {
         lastSeenMessageTime = lastSeenMessageTime ?? "0";
         
@@ -56,6 +56,10 @@ public class CosmosMessageStore: IMessageStore
         if (response.Diagnostics != null)
         {
             Console.WriteLine($"\nGetMessageList Diagnostics: {response.Diagnostics.ToString()}");
+        }
+        else
+        {
+            return null;
         }
          
         continuationToken = response.ContinuationToken;

@@ -25,9 +25,12 @@ public class ConversationsController : ControllerBase
     {
         var response = await _chatManager.StartConversation(conversationRequest);
 
-        if (response == null) return NotFound("");
+        if (response == null) return NotFound("The profile was not found.");
 
         return CreatedAtAction(nameof(GetConversationList), null, response);
+        
+        // todo returning CONFLICT
+        // todo returning BADREQUEST
     }
 
     [HttpPost("{conversationId}/messages")]
@@ -43,6 +46,8 @@ public class ConversationsController : ControllerBase
         {
             return Conflict();
         }
+        // todo returning NOTFOUND
+        // todo returning BADREQUEST
     }
 
     [HttpGet("{conversationId}/messages")]
@@ -55,6 +60,7 @@ public class ConversationsController : ControllerBase
             await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
 
         if (response == null) return NotFound();
+        // todo returning NOTFOUND is not possible
 
         return Ok(response);
     }
@@ -69,6 +75,7 @@ public class ConversationsController : ControllerBase
             await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
 
         if (response == null) return NotFound();
+        // todo returning NOTFOUND is not possible
         
         return Ok(response);
     }

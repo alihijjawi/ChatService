@@ -29,7 +29,7 @@ public class ConversationService : IConversationService
         return await _conversationStore.GetConversationById(conversationId);
     }
 
-    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
+    public async Task<ConversationsList?> GetConversationList(string username, string? continuationToken, string? limit,
         string? lastSeenConversationTime)
     {
         return await _conversationStore.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);

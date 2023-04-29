@@ -18,7 +18,7 @@ public class MessageService: IMessageService
         return new SendMessageResponse(unixTime);
     }
 
-    public async Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
+    public async Task<MessagesList?> GetMessageList(string conversationId, string? continuationToken, string? limit, string? lastSeenMessageTime)
     {
         return await _messageStore.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
     }

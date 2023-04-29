@@ -22,7 +22,7 @@ public class CosmosConversationStore : IConversationStore
         await Container.UpsertItemAsync(entity);
     }
 
-    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
+    public async Task<ConversationsList?> GetConversationList(string username, string? continuationToken, string? limit,
         string? lastSeenConversationTime)
     {
         lastSeenConversationTime = lastSeenConversationTime ?? "0";
@@ -51,6 +51,10 @@ public class CosmosConversationStore : IConversationStore
         if (response.Diagnostics != null)
         {
             Console.WriteLine($"\nGetConversationList Diagnostics: {response.Diagnostics.ToString()}");
+        }
+        else
+        {
+            return null;
         }
             
         if (response.Count > 0)
