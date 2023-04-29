@@ -14,12 +14,12 @@ using Newtonsoft.Json;
 
 namespace ChatService.Test.Controllers;
 
-public class ImageControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class ImagesControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly Mock<IImageService> _imageStoreMock = new();
     private readonly HttpClient _httpClient;
 
-    public ImageControllerTests(WebApplicationFactory<Program> factory)
+    public ImagesControllerTests(WebApplicationFactory<Program> factory)
     {
         _httpClient = factory.WithWebHostBuilder(builder =>
         {
@@ -34,7 +34,7 @@ public class ImageControllerTests : IClassFixture<WebApplicationFactory<Program>
         _imageStoreMock.Setup(m => m.DownloadImage(imageId))
             .ReturnsAsync(new FileContentResult(Array.Empty<byte>(), "image/jpeg"));
 
-        var response = await _httpClient.GetAsync($"/image/{imageId}");
+        var response = await _httpClient.GetAsync($"api/images/{imageId}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         
         _imageStoreMock.Verify(mock => mock.DownloadImage(imageId), Times.Once);
@@ -47,7 +47,7 @@ public class ImageControllerTests : IClassFixture<WebApplicationFactory<Program>
         _imageStoreMock.Setup(m => m.DownloadImage(imageId))
             .ThrowsAsync(new ArgumentException($"Image with id:'{imageId}' does not exist"));
 
-        var response = await _httpClient.GetAsync($"/image/{imageId}");
+        var response = await _httpClient.GetAsync($"api/images/{imageId}");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         
         _imageStoreMock.Verify(mock => mock.DownloadImage(imageId), Times.Once);
@@ -63,10 +63,10 @@ public class ImageControllerTests : IClassFixture<WebApplicationFactory<Program>
         using var content = new MultipartFormDataContent();
         var fileContent = new ByteArrayContent(fileContents);
         content.Add(fileContent, "file", "filename.ext");
-        var response = await _httpClient.PostAsync("/image", content);
+        var response = await _httpClient.PostAsync("api/images", content);
         
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.Equal("http://localhost/Image/foobar", response.Headers.GetValues("Location").First());
+        Assert.Equal("http://localhost/api/Images/foobar", response.Headers.GetValues("Location").First());
 
         _imageStoreMock.Verify(mock => mock.UploadImage(It.IsAny<IFormFile>()), Times.Once);
     }
@@ -77,7 +77,7 @@ public class ImageControllerTests : IClassFixture<WebApplicationFactory<Program>
         using var content = new MultipartFormDataContent();
         var fileContent = new ByteArrayContent(Array.Empty<byte>());
         content.Add(fileContent, "file", "filename.ext");
-        var response = await _httpClient.PostAsync("/image", content);
+        var response = await _httpClient.PostAsync("api/images", content);
         
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         
