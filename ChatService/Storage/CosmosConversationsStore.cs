@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Data;
+using System.Net;
 using System.Web;
 using ChatService.Dtos;
 using ChatService.Storage.Entities;
@@ -17,13 +18,19 @@ public class CosmosConversationsStore : IConversationsStore
 
     private Container Container => _cosmosClient.GetDatabase("conversationsDb").GetContainer("conversations");
 
+    public async Task CreateConversation(string conversationId, ProfileDto recipient, long unixTime)
+    {
+        var entity = ToEntity(conversationId, recipient, unixTime);
+        await Container.CreateItemAsync(entity);
+    }
+    
     public async Task UpsertConversation(string conversationId, ProfileDto recipient, long unixTime)
     {
         var entity = ToEntity(conversationId, recipient, unixTime);
         await Container.UpsertItemAsync(entity);
     }
 
-    public async Task<ConversationsList?> GetConversationList(string username, string? continuationToken, string? limit,
+    public async Task<ConversationsList> GetConversationList(string username, string? continuationToken, string? limit,
         string? lastSeenConversationTime)
     {
         lastSeenConversationTime = lastSeenConversationTime ?? "0";
@@ -48,10 +55,10 @@ public class CosmosConversationsStore : IConversationsStore
             Container.GetItemQueryIterator<ConversationEntity>(queryDefinition, requestOptions: requestOptions, continuationToken: continuationToken);
         
         var response = await iterator.ReadNextAsync();
-            
+
         if (response.Diagnostics != null)
         {
-            Console.WriteLine($"\nGetConversationList Diagnostics: {response.Diagnostics.ToString()}");
+            Console.WriteLine($"\nGetConversationList Diagnostics: {response.Diagnostics}");
         }
         else
         {
@@ -84,10 +91,15 @@ public class CosmosConversationsStore : IConversationsStore
         var iterator = Container.GetItemQueryIterator<ConversationEntity>(queryDefinition);
         
         var response = await iterator.ReadNextAsync();
+
+        if (response.Count == 0)
+        {
+            throw new DataException();
+        }
             
         if (response.Diagnostics != null)
         {
-            Console.WriteLine($"\nGetConversationById Diagnostics: {response.Diagnostics.ToString()}");
+            Console.WriteLine($"\nGetConversationById Diagnostics: {response.Diagnostics}");
         }
 
         var conversationList = response.Select(ToConversation).ToArray();

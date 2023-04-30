@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Data;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Web;
 using ChatService.Dtos;
@@ -23,14 +24,18 @@ public class ConversationsController : ControllerBase
     public async Task<ActionResult<StartConversationResponse>> StartConversation(
         StartConversationRequest conversationRequest)
     {
-        var response = await _chatManager.StartConversation(conversationRequest);
+        try
+        {
+            var response = await _chatManager.StartConversation(conversationRequest);
 
-        if (response == null) return NotFound("The profile was not found.");
-
-        return CreatedAtAction(nameof(GetConversationList), null, response);
-        
-        // todo returning CONFLICT
-        // todo returning BADREQUEST
+            return CreatedAtAction(nameof(GetConversationList), null, response);
+        } catch (DataException e) {
+            Console.WriteLine(e);
+            return NotFound($"Participants: '{conversationRequest.Participants}' not found");
+        } catch (Exception e) {
+            Console.WriteLine(e);
+            return Conflict($"Conversation with participants: '{conversationRequest.Participants}' already exists");
+        }
     }
 
     [HttpPost("{conversationId}/messages")]
@@ -41,13 +46,13 @@ public class ConversationsController : ControllerBase
         {
             var response = await _chatManager.SendMessage(conversationId, messageRequest);
             return CreatedAtAction(nameof(GetMessageList), new { conversationId = conversationId }, response);
+        } catch (DataException e) {
+            Console.WriteLine(e);
+            return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
+        } catch (Exception e) {
+            Console.WriteLine(e);
+            return Conflict($"Message with Id: '{messageRequest.Id}' already exists");
         }
-        catch
-        {
-            return Conflict();
-        }
-        // todo returning NOTFOUND
-        // todo returning BADREQUEST
     }
 
     [HttpGet("{conversationId}/messages")]
@@ -56,13 +61,14 @@ public class ConversationsController : ControllerBase
         [FromQuery] string? limit,
         [FromQuery] string? lastSeenMessageTime)
     {
-        var response =
-            await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
-
-        if (response == null) return NotFound();
-        // todo returning NOTFOUND is not possible
-
-        return Ok(response);
+        try {
+            var response =
+                await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
+            
+            return Ok(response);
+        } catch (DataException e) {
+            return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
+        }
     }
 
     [HttpGet]
@@ -71,12 +77,12 @@ public class ConversationsController : ControllerBase
         [FromQuery] string? limit,
         [FromQuery] string? lastSeenConversationTime)
     {
-        var response =
-            await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
-
-        if (response == null) return NotFound();
-        // todo returning NOTFOUND is not possible
-        
-        return Ok(response);
+        try {
+            var response =
+                await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
+            return Ok(response);
+        } catch (DataException e) {
+            return NotFound($"A user with username {username} was not found");
+        }
     }
 }

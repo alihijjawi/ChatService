@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System.Data;
+using System.Web;
 using ChatService.Dtos;
 using ChatService.Storage.Entities;
 using Microsoft.Azure.Cosmos;
@@ -52,6 +53,11 @@ public class CosmosMessageStore: IMessageStore
             Container.GetItemQueryIterator<MessageEntity>(queryDefinition, requestOptions: requestOptions, continuationToken: continuationToken);
 
         var response = await iterator.ReadNextAsync();
+        
+        if (response.Count == 0)
+        {
+            throw new DataException();
+        }
             
         if (response.Diagnostics != null)
         {

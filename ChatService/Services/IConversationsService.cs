@@ -4,7 +4,7 @@ namespace ChatService.Services;
 
 public interface IConversationsService
 {
-    Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime);
+    Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto receiverProfile, long unixTime);
 
     Task<ConversationsList> GetConversationList(string username,
         string? continuationToken,

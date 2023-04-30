@@ -13,9 +13,9 @@ public class ConversationsService : IConversationsService
         _conversationsStore = conversationsStore;
     }
 
-    public async Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime)
+    public async Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto receiverProfile, long unixTime)
     {
-        await _conversationsStore.UpsertConversation(conversationId, senderProfile, unixTime);
+        await _conversationsStore.CreateConversation(conversationId, receiverProfile, unixTime);
         return new StartConversationResponse(conversationId, unixTime);
     }
 

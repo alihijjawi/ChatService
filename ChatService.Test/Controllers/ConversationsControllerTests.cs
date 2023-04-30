@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net;
 using System.Text;
 using System.Web;
@@ -29,8 +30,10 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
     {
         string[] participants = new[] { "foo", "bar" };
         var sendMessageRequest = new SendMessageRequest(Guid.NewGuid().ToString(), "foo", "test");
+        
         var startConversationRequest = new StartConversationRequest(participants, sendMessageRequest);
-        _chatManagerMock.Setup(m => m.StartConversation(startConversationRequest))
+        
+        _chatManagerMock.Setup(m => m.StartConversation(It.IsAny<StartConversationRequest>()))
             .ReturnsAsync(new StartConversationResponse(Guid.NewGuid().ToString(), long.MinValue));
         
         var response = await _httpClient.PostAsync("api/Conversations",
@@ -39,7 +42,7 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.Equal("http://localhost/api/Conversations", response.Headers.GetValues("Location").First());
 
-        _chatManagerMock.Verify(mock => mock.StartConversation(startConversationRequest), Times.Once);
+        _chatManagerMock.Verify(mock => mock.StartConversation(It.IsAny<StartConversationRequest>()), Times.Once);
     }
     
     [Fact]
@@ -49,13 +52,31 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
         var sendMessageRequest = new SendMessageRequest(Guid.NewGuid().ToString(), "foo", "test");
         var startConversationRequest = new StartConversationRequest(participants, sendMessageRequest);
 
-        _chatManagerMock.Setup(m => m.StartConversation(startConversationRequest))!
-            .ReturnsAsync((StartConversationResponse?)null);
+        _chatManagerMock.Setup(m => m.StartConversation(It.IsAny<StartConversationRequest>()))!
+            .ThrowsAsync(new DataException());
 
         var response = await _httpClient.PostAsync("api/Conversations",
             new StringContent(JsonConvert.SerializeObject(startConversationRequest), Encoding.Default, "application/json"));
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        _chatManagerMock.Verify(mock => mock.StartConversation(startConversationRequest), Times.Never);
+    }
+    
+    [Fact]
+    public async Task StartConversation_Conflict()
+    {
+        string[] participants = new[] { "foo", "bar" };
+        var sendMessageRequest = new SendMessageRequest(Guid.NewGuid().ToString(), "foo", "test");
+        var startConversationRequest = new StartConversationRequest(participants, sendMessageRequest);
+
+        _chatManagerMock.Setup(m => m.StartConversation(It.IsAny<StartConversationRequest>()))!
+            .ThrowsAsync(new Exception());
+
+        var response = await _httpClient.PostAsync("api/Conversations",
+            new StringContent(JsonConvert.SerializeObject(startConversationRequest), Encoding.Default, "application/json"));
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
 
         _chatManagerMock.Verify(mock => mock.StartConversation(startConversationRequest), Times.Never);
     }
@@ -82,12 +103,29 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
         var sendMessageRequest = new SendMessageRequest(Guid.NewGuid().ToString(), "foo", "test");
 
         _chatManagerMock.Setup(m => m.SendMessage(conversationId, sendMessageRequest))
-            .ThrowsAsync(new Exception("Duplicate message id sent."));
+            .ThrowsAsync(new Exception());
         
         var response = await _httpClient.PostAsync($"api/Conversations/{conversationId}/messages",
             new StringContent(JsonConvert.SerializeObject(sendMessageRequest), Encoding.Default, "application/json"));
 
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+
+        _chatManagerMock.Verify(mock => mock.SendMessage(conversationId, sendMessageRequest), Times.Once);
+    }
+    
+    [Fact]
+    public async Task SendMessage_NotFound()
+    {
+        var conversationId = Guid.NewGuid().ToString();
+        var sendMessageRequest = new SendMessageRequest(Guid.NewGuid().ToString(), "foo", "test");
+
+        _chatManagerMock.Setup(m => m.SendMessage(conversationId, sendMessageRequest))
+            .ThrowsAsync(new DataException());
+        
+        var response = await _httpClient.PostAsync($"api/Conversations/{conversationId}/messages",
+            new StringContent(JsonConvert.SerializeObject(sendMessageRequest), Encoding.Default, "application/json"));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
 
         _chatManagerMock.Verify(mock => mock.SendMessage(conversationId, sendMessageRequest), Times.Once);
     }
@@ -111,7 +149,7 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
     {
         var conversationId = Guid.NewGuid().ToString();
         _chatManagerMock.Setup(m => m.GetMessageList(conversationId, null, null, null))!
-            .ReturnsAsync((MessagesList?)null);
+            .ThrowsAsync(new DataException());
 
         var response = await _httpClient.GetAsync($"api/Conversations/{conversationId}/messages");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -140,7 +178,7 @@ public class ConversationsControllerTests : IClassFixture<WebApplicationFactory<
     {
         var username = Guid.NewGuid().ToString();
         _chatManagerMock.Setup(m => m.GetConversationList(username, null, null, null))!
-            .ReturnsAsync((ConversationsList?)null);
+            .ThrowsAsync(new DataException());
 
         var uriBuilder = new UriBuilder("https://localhost/api/Conversations");
         var query = HttpUtility.ParseQueryString(uriBuilder.Query);

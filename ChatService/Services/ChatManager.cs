@@ -1,3 +1,4 @@
+using System.Data;
 using ChatService.Dtos;
 using Microsoft.Azure.Cosmos.Linq;
 
@@ -22,7 +23,7 @@ public class ChatManager : IChatManager
         var senderProfile = await _profileService.GetProfile(conversationRequest.Participants[0]);
         var receiverProfile = await _profileService.GetProfile(conversationRequest.Participants[1]);
 
-        if (senderProfile == null || receiverProfile == null) return null; //todo
+        if (senderProfile == null || receiverProfile == null) throw new DataException();
 
         var conversationId =
             (String.Compare(senderProfile.UserName,
@@ -44,6 +45,8 @@ public class ChatManager : IChatManager
     public async Task<ConversationsList?> GetConversationList(string username, string? continuationToken, string? limit,
         string? lastSeenConversationTime)
     {
+        var profile = await _profileService.GetProfile(username);
+        if (profile == null) throw new DataException();
         return await _conversationsService.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
     }
 
