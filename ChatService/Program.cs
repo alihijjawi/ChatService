@@ -30,7 +30,7 @@ builder.Services.AddSingleton(sp =>
     return storageAccount.CreateCloudBlobClient();
 });
 
-builder.Services.AddSingleton<IConversationStore, CosmosConversationStore>();
+builder.Services.AddSingleton<IConversationsStore, CosmosConversationsStore>();
 builder.Services.AddSingleton(sp =>
 {
     var cosmosOptions = sp.GetRequiredService<IOptions<CosmosSettings>>();
@@ -48,7 +48,7 @@ builder.Services.AddSingleton<IChatManager, ChatManager>();
 
 builder.Services.AddSingleton<IProfileService, ProfileService>();
 builder.Services.AddSingleton<IImageService, ImageService>();
-builder.Services.AddSingleton<IConversationService, ConversationService>();
+builder.Services.AddSingleton<IConversationsService, ConversationsService>();
 builder.Services.AddSingleton<IMessageService, MessageService>();
 
 var app = builder.Build();

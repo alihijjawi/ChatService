@@ -1,15 +1,16 @@
-﻿using System.Web;
+﻿using System.Net;
+using System.Web;
 using ChatService.Dtos;
 using ChatService.Storage.Entities;
 using Microsoft.Azure.Cosmos;
 
 namespace ChatService.Storage;
 
-public class CosmosConversationStore : IConversationStore
+public class CosmosConversationsStore : IConversationsStore
 {
     private readonly CosmosClient _cosmosClient;
 
-    public CosmosConversationStore(CosmosClient cosmosClient)
+    public CosmosConversationsStore(CosmosClient cosmosClient)
     {
         _cosmosClient = cosmosClient;
     }
@@ -94,6 +95,26 @@ public class CosmosConversationStore : IConversationStore
         var nextUri = "";
         
         return new ConversationsList(conversationList,nextUri);
+    }
+
+    public async Task DeleteConversation(string conversationId, string username)
+    {
+        try
+        {
+            await Container.DeleteItemAsync<ConversationDto>(
+                id: conversationId,
+                partitionKey: new PartitionKey(username)
+            );
+        }
+        catch (CosmosException e)
+        {
+            if (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return;
+            }
+
+            throw;
+        }
     }
 
     private static ConversationEntity ToEntity(string conversationId, ProfileDto recipient, long unixTime)

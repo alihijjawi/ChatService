@@ -2,7 +2,7 @@
 
 namespace ChatService.Services;
 
-public interface IConversationService
+public interface IConversationsService
 {
     Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto senderProfile, long unixTime);
 
@@ -14,4 +14,6 @@ public interface IConversationService
     Task<ConversationsList> GetConversationById(string conversationId);
 
     Task UpdateConversation(string conversationId, ProfileDto senderProfile, long unixTime);
+    
+    Task DeleteConversation(string conversationId, string username);
 }

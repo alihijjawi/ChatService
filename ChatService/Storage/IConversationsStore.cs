@@ -2,7 +2,7 @@
 
 namespace ChatService.Storage;
 
-public interface IConversationStore
+public interface IConversationsStore
 {
     Task UpsertConversation(string conversationId, ProfileDto recipient, long unixTime);
 
@@ -10,4 +10,6 @@ public interface IConversationStore
         string? lastSeenConversationTime);
     
     Task<ConversationsList> GetConversationById(string conversationId);
+    
+    Task DeleteConversation(string conversationId, string username);
 }
