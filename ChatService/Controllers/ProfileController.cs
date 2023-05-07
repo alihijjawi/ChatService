@@ -39,6 +39,8 @@ public class ProfileController : ControllerBase
 
             var timer = new Stopwatch();
             timer.Start();
+            // await _profileService.EnqueueCreateProfile(profile);
+            // for some reason it was not finding the service bus
             await _profileService.UpsertProfile(profile);
             timer.Stop();
             _telemetry.TrackEvent("Creating a Profile");

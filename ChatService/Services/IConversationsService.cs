@@ -4,6 +4,8 @@ namespace ChatService.Services;
 
 public interface IConversationsService
 {
+    Task EnqueueCreateConversation(ConversationDto conversation);
+    
     Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto receiverProfile, long unixTime);
 
     Task<ConversationsList> GetConversationList(string username,

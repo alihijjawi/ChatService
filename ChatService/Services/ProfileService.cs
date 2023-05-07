@@ -1,4 +1,5 @@
 using ChatService.Dtos;
+using ChatService.Services.ServiceBus;
 using ChatService.Storage;
 
 namespace ChatService.Services;
@@ -6,10 +7,17 @@ namespace ChatService.Services;
 public class ProfileService : IProfileService
 {
     private readonly IProfileStore _profileStore;
+    private readonly ICreateProfilePublisher _createProfilePublisher;
 
-    public ProfileService(IProfileStore profileStore)
+    public ProfileService(IProfileStore profileStore, ICreateProfilePublisher createProfilePublisher)
     {
         _profileStore = profileStore;
+        _createProfilePublisher = createProfilePublisher;
+    }
+    
+    public async Task EnqueueCreateProfile(ProfileDto profile)
+    {
+        await _createProfilePublisher.Send(profile);
     }
 
     public Task UpsertProfile(ProfileDto profile)

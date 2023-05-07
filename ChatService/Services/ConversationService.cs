@@ -1,4 +1,5 @@
 ﻿using ChatService.Dtos;
+using ChatService.Services.ServiceBus;
 using ChatService.Storage;
 using Microsoft.Azure.Cosmos.Linq;
 
@@ -7,10 +8,17 @@ namespace ChatService.Services;
 public class ConversationsService : IConversationsService
 {
     private readonly IConversationsStore _conversationsStore;
+    private readonly ICreateConversationPublisher _createConversationPublisher;
 
-    public ConversationsService(IConversationsStore conversationsStore)
+    public ConversationsService(IConversationsStore conversationsStore, ICreateConversationPublisher createConversationPublisher)
     {
         _conversationsStore = conversationsStore;
+        _createConversationPublisher = createConversationPublisher;
+    }
+    
+    public async Task EnqueueCreateConversation(ConversationDto conversation)
+    {
+        await _createConversationPublisher.Send(conversation);
     }
 
     public async Task<StartConversationResponse> CreateConversation(string conversationId, ProfileDto receiverProfile, long unixTime)

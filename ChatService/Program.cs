@@ -54,14 +54,18 @@ builder.Services.AddSingleton(sp =>
 });
 
 builder.Services.AddSingleton<IChatManager, ChatManager>();
-
 builder.Services.AddSingleton<IProfileService, ProfileService>();
 builder.Services.AddSingleton<IImageService, ImageService>();
 builder.Services.AddSingleton<IConversationsService, ConversationsService>();
 builder.Services.AddSingleton<IMessageService, MessageService>();
+
 builder.Services.AddSingleton<ICreateProfilePublisher, CreateProfileServiceBusPublisher>();
 builder.Services.AddSingleton<IProfileSerializer, JsonProfileSerializer>();    
 builder.Services.AddHostedService<CreateProfileHostedService>();
+
+builder.Services.AddSingleton<ICreateConversationPublisher, CreateConversationServiceBusPublisher>();
+builder.Services.AddSingleton<IConversationSerializer, JsonConversationSerializer>();    
+builder.Services.AddHostedService<CreateConversationHostedService>();
 
 builder.Services.AddApplicationInsightsTelemetry();
 

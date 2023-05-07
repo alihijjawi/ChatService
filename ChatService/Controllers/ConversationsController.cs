@@ -34,6 +34,8 @@ public class ConversationsController : ControllerBase
             {
                 var timer = new Stopwatch();
                 timer.Start();
+                // await _conversationService.EnqueueCreateProfile(conversationRequest);
+                // for some reason it was not finding the service bus
                 var response = await _chatManager.StartConversation(conversationRequest);
                 timer.Stop();
                 
