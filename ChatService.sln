@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService.Test", "ChatSer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService.IntegrationTest", "ChatService.IntegrationTest\ChatService.IntegrationTest.csproj", "{9481EB32-8CB6-4C03-A376-5FAA9694FCA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService.Client", "ChatService.Client\ChatService.Client.csproj", "{AA7F05CC-D297-4173-B7FB-76D86FC71B3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService.DataContracts", "ChatService.DataContracts\ChatService.DataContracts.csproj", "{3EF7F3B0-4EF8-4615-852D-909C9FCCE52A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatService.FunctionalTests", "ChatService.FunctionalTests\ChatService.FunctionalTests.csproj", "{2D32CB49-6FF1-4902-AFB1-EBB699081A14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,17 @@ Global
 		{9481EB32-8CB6-4C03-A376-5FAA9694FCA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9481EB32-8CB6-4C03-A376-5FAA9694FCA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9481EB32-8CB6-4C03-A376-5FAA9694FCA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA7F05CC-D297-4173-B7FB-76D86FC71B3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA7F05CC-D297-4173-B7FB-76D86FC71B3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA7F05CC-D297-4173-B7FB-76D86FC71B3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA7F05CC-D297-4173-B7FB-76D86FC71B3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EF7F3B0-4EF8-4615-852D-909C9FCCE52A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EF7F3B0-4EF8-4615-852D-909C9FCCE52A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EF7F3B0-4EF8-4615-852D-909C9FCCE52A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EF7F3B0-4EF8-4615-852D-909C9FCCE52A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D32CB49-6FF1-4902-AFB1-EBB699081A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D32CB49-6FF1-4902-AFB1-EBB699081A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D32CB49-6FF1-4902-AFB1-EBB699081A14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D32CB49-6FF1-4902-AFB1-EBB699081A14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

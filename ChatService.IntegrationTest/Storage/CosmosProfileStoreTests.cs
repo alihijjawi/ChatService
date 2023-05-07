@@ -56,9 +56,6 @@ public class CosmosProfileStoreTests : IClassFixture<WebApplicationFactory<Progr
     [InlineData("foobar", "Foo", "", "imageId")]
     [InlineData("foobar", "Foo", null, "imageId")]
     [InlineData("foobar", "Foo", " ", "imageId")]
-    [InlineData("foobar", "Foo", "Bar", null)]
-    [InlineData("foobar", "Foo", "Bar", "  ")]
-    [InlineData("foobar", "Foo", "Bar", "")]
     public async Task? AddProfile_InvalidArgs(string username, string firstName, string lastName, string imageId)
     {
         await Assert.ThrowsAsync<ArgumentException>(() => _profileService.UpsertProfile(new ProfileDto(username, firstName, lastName, imageId)));

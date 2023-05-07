@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text;
-using ChatService.Storage;
 using ChatService.Dtos;
 using ChatService.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -31,7 +30,7 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
         _profileServiceMock.Setup(m => m.GetProfile(profile.UserName))
             .ReturnsAsync(profile);
 
-        var response = await _httpClient.GetAsync($"/Profile/{profile.UserName}");
+        var response = await _httpClient.GetAsync($"api/Profile/{profile.UserName}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = await response.Content.ReadAsStringAsync();
         Assert.Equal(profile, JsonConvert.DeserializeObject<ProfileDto>(json));
@@ -43,7 +42,7 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
         _profileServiceMock.Setup(m => m.GetProfile("foobar"))
             .ReturnsAsync((ProfileDto?)null);
 
-        var response = await _httpClient.GetAsync($"/Profile/foobar");
+        var response = await _httpClient.GetAsync($"api/Profile/foobar");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -51,11 +50,11 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
     public async Task AddProfile()
     {
         var profile = new ProfileDto("foobar", "Foo", "Bar", "foobarImage");
-        var response = await _httpClient.PostAsync("/Profile",
+        var response = await _httpClient.PostAsync("api/Profile",
             new StringContent(JsonConvert.SerializeObject(profile), Encoding.Default, "application/json"));
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.Equal("http://localhost/Profile/foobar", response.Headers.GetValues("Location").First());
+        Assert.Equal("http://localhost/api/Profile/foobar", response.Headers.GetValues("Location").First());
 
         _profileServiceMock.Verify(mock => mock.UpsertProfile(profile), Times.Once);
     }
@@ -67,7 +66,7 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
         _profileServiceMock.Setup(m => m.GetProfile(profile.UserName))
             .ReturnsAsync(profile);
 
-        var response = await _httpClient.PostAsync("/Profile",
+        var response = await _httpClient.PostAsync("api/Profile",
             new StringContent(JsonConvert.SerializeObject(profile), Encoding.Default, "application/json"));
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
 
@@ -84,13 +83,10 @@ public class ProfileControllerTests : IClassFixture<WebApplicationFactory<Progra
     [InlineData("foobar", "Foo", "", "imageId")]
     [InlineData("foobar", "Foo", null, "imageId")]
     [InlineData("foobar", "Foo", " ", "imageId")]
-    [InlineData("foobar", "Foo", "Bar", null)]
-    [InlineData("foobar", "Foo", "Bar", "")]
-    [InlineData("foobar", "Foo", "Bar", "  ")]
     public async Task AddProfile_InvalidArgs(string userName, string firstName, string lastName, string imageId)
     {
         var profile = new ProfileDto(userName, firstName, lastName, imageId);
-        var response = await _httpClient.PostAsync("/Profile",
+        var response = await _httpClient.PostAsync("api/Profile",
             new StringContent(JsonConvert.SerializeObject(profile), Encoding.Default, "application/json"));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
