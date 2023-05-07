@@ -8,4 +8,6 @@ public interface IMessageStore
 
     Task<MessagesList> GetMessageList(string conversationId, string? continuationToken, string? limit,
         string? lastSeenMessageTime);
+
+    Task DeleteMessage(string messageId, string conversationId);
 }

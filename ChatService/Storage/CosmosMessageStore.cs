@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Net;
 using System.Web;
 using ChatService.Dtos;
 using ChatService.Storage.Entities;
@@ -81,6 +82,26 @@ public class CosmosMessageStore: IMessageStore
         }
 
         return new MessagesList(conversationList,nextUri);
+    }
+    
+    public async Task DeleteMessage(string messageId, string conversationId)
+    {
+        try
+        {
+            await Container.DeleteItemAsync<MessageDto>(
+                id: messageId,
+                partitionKey: new PartitionKey(conversationId)
+            );
+        }
+        catch (CosmosException e)
+        {
+            if (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return;
+            }
+
+            throw;
+        }
     }
     
     private static MessageEntity ToEntity(string messageId, string conversationId, string senderUsername, string text, long unixTime)

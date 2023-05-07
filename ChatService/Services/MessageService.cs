@@ -22,4 +22,9 @@ public class MessageService: IMessageService
     {
         return await _messageStore.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
     }
+    
+    public async Task DeleteMessage(string messageId, string conversationId)
+    {
+        await _messageStore.DeleteMessage(messageId, conversationId);
+    }
 }

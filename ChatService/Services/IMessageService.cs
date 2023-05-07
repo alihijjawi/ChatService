@@ -10,4 +10,6 @@ public interface IMessageService
         string? continuationToken,
         string? limit,
         string? lastSeenMessageTime);
+
+    Task DeleteMessage(string messageId, string conversationdId);
 }

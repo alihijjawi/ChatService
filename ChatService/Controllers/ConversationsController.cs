@@ -1,11 +1,9 @@
 ﻿using System.Data;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Web;
+using System.Diagnostics;
 using ChatService.Dtos;
 using ChatService.Services;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos.Linq;
 
 namespace ChatService.Controllers;
 
@@ -14,27 +12,47 @@ namespace ChatService.Controllers;
 public class ConversationsController : ControllerBase
 {
     private readonly IChatManager _chatManager;
+    private readonly ILogger<ProfileController> _logger;
+    private readonly TelemetryClient _telemetry;
 
-    public ConversationsController(IChatManager chatManager)
+    public ConversationsController(IChatManager chatManager, ILogger<ProfileController> logger, TelemetryClient telemetry)
     {
         _chatManager = chatManager;
+        _logger = logger;
+        _telemetry = telemetry;
     }
 
     [HttpPost]
     public async Task<ActionResult<StartConversationResponse>> StartConversation(
         StartConversationRequest conversationRequest)
     {
-        try
+        using (_logger.BeginScope("{Request}", conversationRequest))
         {
-            var response = await _chatManager.StartConversation(conversationRequest);
+            _logger.LogInformation("Starting conversation for users {user1} and {user2}", conversationRequest.Participants[0], conversationRequest.Participants[1]);
 
-            return CreatedAtAction(nameof(GetConversationList), null, response);
-        } catch (DataException e) {
-            Console.WriteLine(e);
-            return NotFound($"Participants: '{conversationRequest.Participants}' not found");
-        } catch (Exception e) {
-            Console.WriteLine(e);
-            return Conflict($"Conversation with participants: '{conversationRequest.Participants}' already exists");
+            try
+            {
+                var timer = new Stopwatch();
+                timer.Start();
+                var response = await _chatManager.StartConversation(conversationRequest);
+                timer.Stop();
+                
+                _telemetry.TrackEvent("Creating a Conversation");
+                _telemetry.TrackMetric("Creating a Conversation time", timer.ElapsedMilliseconds);
+            
+                _logger.LogInformation("Conversation created: {ConversationId}", response.Id);
+                return CreatedAtAction(nameof(GetConversationList), null, response);
+            }
+            catch (DataException e)
+            {
+                _logger.LogInformation("Failed to create a conversation with username(s) {user1} or/and {user2} is/are missing", conversationRequest.Participants[0], conversationRequest.Participants[1]);
+                return NotFound($"One or Both Participants: '{conversationRequest.Participants}' not found");
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Failed to create a duplicate conversation for usernames {user1} and {user2}", conversationRequest.Participants[0], conversationRequest.Participants[1]);
+                return Conflict($"Conversation with participants: '{conversationRequest.Participants}' already exists");
+            }
         }
     }
 
@@ -42,16 +60,33 @@ public class ConversationsController : ControllerBase
     public async Task<ActionResult<SendMessageResponse>> SendMessage(string conversationId,
         SendMessageRequest messageRequest)
     {
-        try
+        using (_logger.BeginScope("{ConversationId}", conversationId))
         {
-            var response = await _chatManager.SendMessage(conversationId, messageRequest);
-            return CreatedAtAction(nameof(GetMessageList), new { conversationId = conversationId }, response);
-        } catch (DataException e) {
-            Console.WriteLine(e);
-            return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
-        } catch (Exception e) {
-            Console.WriteLine(e);
-            return Conflict($"Message with Id: '{messageRequest.Id}' already exists");
+            _logger.LogInformation("Sending message {MessageId} to conversation {ConversationId} from user {sender}", messageRequest.Id, conversationId, messageRequest.SenderUsername);
+
+            try
+            {
+                var timer = new Stopwatch();
+                timer.Start();
+                var response = await _chatManager.SendMessage(conversationId, messageRequest);
+                timer.Stop();
+
+                _telemetry.TrackEvent("Sending a Message");
+                _telemetry.TrackMetric("Sending a Message time", timer.ElapsedMilliseconds);
+            
+                _logger.LogInformation("Message {MessageId} = {Text} sent at {Time}", messageRequest.Id, messageRequest.Text, response.CreatedUnixTime);
+                return CreatedAtAction(nameof(GetMessageList), new { conversationId }, response);
+            }
+            catch (DataException e)
+            {
+                _logger.LogInformation("Failed to send message to a non-existent conversation {ConversationId}", conversationId);
+                return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation("Failed to send a duplicate message {MessageId}", messageRequest.Id);
+                return Conflict($"Message with Id: '{messageRequest.Id}' already exists");
+            }
         }
     }
 
@@ -61,13 +96,28 @@ public class ConversationsController : ControllerBase
         [FromQuery] string? limit,
         [FromQuery] string? lastSeenMessageTime)
     {
-        try {
-            var response =
-                await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
+        using (_logger.BeginScope("{ConversationId}", conversationId))
+        {
+            _logger.LogInformation("Fetching messages of conversation {ConversationId}", conversationId);
+
+            try {
+                var timer = new Stopwatch();
+                timer.Start();
+                var response =
+                    await _chatManager.GetMessageList(conversationId, continuationToken, limit, lastSeenMessageTime);
+                timer.Stop();
+
+                _telemetry.TrackEvent("Fetching Messages");
+                _telemetry.TrackMetric("Fetching Messages time", timer.ElapsedMilliseconds);
             
-            return Ok(response);
-        } catch (DataException e) {
-            return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
+                _logger.LogInformation("Fetched Messages of conversation {ConversationId} ", conversationId);
+                return Ok(response);
+            } 
+            catch (DataException e)
+            {
+                _logger.LogInformation("Failed to fetch a non-existent {ConversationId} conversation's messages", conversationId);
+                return NotFound($"Conversation with ConversationId: '{conversationId}' was not found");
+            }
         }
     }
 
@@ -77,12 +127,30 @@ public class ConversationsController : ControllerBase
         [FromQuery] string? limit,
         [FromQuery] string? lastSeenConversationTime)
     {
-        try {
-            var response =
-                await _chatManager.GetConversationList(username, continuationToken, limit, lastSeenConversationTime);
-            return Ok(response);
-        } catch (DataException e) {
-            return NotFound($"A user with username {username} was not found");
+        using (_logger.BeginScope("{Username}", username))
+        {
+            _logger.LogInformation("Fetching conversation of user {Username}", username);
+
+            try
+            {
+                var timer = new Stopwatch();
+                timer.Start();
+                var response =
+                    await _chatManager.GetConversationList(username, continuationToken, limit,
+                        lastSeenConversationTime);
+                timer.Stop();
+
+                _telemetry.TrackEvent("Fetching Conversations");
+                _telemetry.TrackMetric("Fetching Conversations time", timer.ElapsedMilliseconds);
+
+                _logger.LogInformation("Fetched Conversations of user {Username} ", username);
+                return Ok(response);
+            }
+            catch (DataException e)
+            {
+                _logger.LogInformation("Failed to fetch a non-existent {Username} Profile's conversations", username);
+                return NotFound($"A user with username {username} was not found");
+            }
         }
     }
 }
